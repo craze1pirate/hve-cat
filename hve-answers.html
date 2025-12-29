@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRM Valliammai Engineering College - Exam Solution</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts (Optional but good for UI) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Animation Utilities */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        .slide-in-from-top-2 {
+            animation: slideDown 0.2s ease-out;
+        }
+        
+        /* Custom Scrollbar for code blocks if needed */
+        ::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Icons (Replaces lucide-react imports) ---
+        
+        const IconWrapper = ({ children, className, ...props }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className} 
+                {...props}
+            >
+                {children}
+            </svg>
+        );
+
+        const ChevronDown = (props) => <IconWrapper {...props}><polyline points="6 9 12 15 18 9" /></IconWrapper>;
+        const ChevronUp = (props) => <IconWrapper {...props}><polyline points="18 15 12 9 6 15" /></IconWrapper>;
+        const Info = (props) => <IconWrapper {...props}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></IconWrapper>;
+        const Droplets = (props) => <IconWrapper {...props}><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.8-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z" /><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.35" /></IconWrapper>;
+        const Activity = (props) => <IconWrapper {...props}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></IconWrapper>;
+        const Zap = (props) => <IconWrapper {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></IconWrapper>;
+
+        // --- Components ---
+
+        const Card = ({ children, className = "" }) => (
+            <div className={`bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 ${className}`}>
+                {children}
+            </div>
+        );
+
+        const Badge = ({ children, color = "blue" }) => {
+            const colors = {
+                blue: "bg-blue-100 text-blue-800",
+                red: "bg-red-100 text-red-800",
+                green: "bg-emerald-100 text-emerald-800",
+                purple: "bg-purple-100 text-purple-800",
+            };
+            return (
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[color]}`}>
+                    {children}
+                </span>
+            );
+        };
+
+        // --- Diagrams ---
+
+        const CloudChargeDiagram = () => (
+            <div className="flex flex-col items-center p-4 bg-sky-50 rounded-lg my-4">
+                <div className="text-sm font-bold text-slate-600 mb-2">Reynolds & Mason Theory Model</div>
+                <svg viewBox="0 0 300 200" className="w-full max-w-md h-48 drop-shadow-lg">
+                    <path d="M 50 150 Q 20 150 20 120 Q 20 80 60 80 Q 80 40 130 40 Q 180 40 200 80 Q 250 80 250 120 Q 250 150 220 150 Z" fill="white" stroke="#94a3b8" strokeWidth="2" />
+                    <g className="animate-pulse">
+                        <text x="130" y="70" textAnchor="middle" fill="#ef4444" fontSize="20" fontWeight="bold">++++</text>
+                        <text x="130" y="130" textAnchor="middle" fill="#3b82f6" fontSize="24" fontWeight="bold">----</text>
+                    </g>
+                    <text x="260" y="70" fontSize="10" fill="#64748b">Ice Crystals (+)</text>
+                    <text x="260" y="130" fontSize="10" fill="#64748b">Graupel (-)</text>
+                    <line x1="250" y1="70" x2="200" y2="70" stroke="#cbd5e1" strokeDasharray="4" />
+                    <line x1="250" y1="130" x2="200" y2="130" stroke="#cbd5e1" strokeDasharray="4" />
+                </svg>
+                <p className="text-xs text-center text-slate-500 mt-2 max-w-xs">
+                    Interaction between falling graupel and rising ice crystals separates charge based on temperature (reversal potential at -15°C).
+                </p>
+            </div>
+        );
+
+        const TownsendDiagram = () => (
+            <div className="flex flex-col items-center p-4 bg-slate-900 rounded-lg my-4 text-white">
+                <div className="text-sm font-bold text-slate-300 mb-2">Townsend Avalanche Mechanism</div>
+                <svg viewBox="0 0 300 150" className="w-full max-w-md h-40">
+                    <rect x="10" y="10" width="10" height="130" fill="#94a3b8" />
+                    <text x="15" y="148" textAnchor="middle" fontSize="10" fill="#cbd5e1">Cathode (-)</text>
+                    <rect x="280" y="10" width="10" height="130" fill="#94a3b8" />
+                    <text x="285" y="148" textAnchor="middle" fontSize="10" fill="#cbd5e1">Anode (+)</text>
+                    <circle cx="30" cy="75" r="3" fill="#fbbf24" />
+                    <line x1="33" y1="75" x2="60" y2="65" stroke="#475569" strokeWidth="1" />
+                    <line x1="33" y1="75" x2="60" y2="85" stroke="#475569" strokeWidth="1" />
+                    <circle cx="60" cy="65" r="2.5" fill="#fbbf24" />
+                    <circle cx="60" cy="85" r="2.5" fill="#fbbf24" />
+                    <path d="M 220 30 Q 250 10 270 50 Q 280 100 250 120 Q 220 110 220 30" fill="url(#grad1)" opacity="0.3" />
+                    <defs>
+                        <radialGradient id="grad1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                            <stop offset="0%" style={{stopColor:'rgb(251, 191, 36)', stopOpacity:1}} />
+                            <stop offset="100%" style={{stopColor:'rgb(251, 191, 36)', stopOpacity:0}} />
+                        </radialGradient>
+                    </defs>
+                </svg>
+            </div>
+        );
+
+        const BewleyLattice = () => (
+            <div className="flex flex-col items-center p-4 bg-white border border-slate-200 rounded-lg my-4">
+                <div className="text-sm font-bold text-slate-700 mb-2">Bewley Lattice Diagram Concept</div>
+                <svg viewBox="0 0 300 180" className="w-full max-w-md h-40">
+                    <defs>
+                        <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L6,3 z" fill="#64748b" />
+                        </marker>
+                    </defs>
+                    <line x1="50" y1="20" x2="50" y2="160" stroke="#000" strokeWidth="2" />
+                    <text x="50" y="15" textAnchor="middle" fontSize="12" fontWeight="bold">Junction A</text>
+                    <line x1="250" y1="20" x2="250" y2="160" stroke="#000" strokeWidth="2" />
+                    <text x="250" y="15" textAnchor="middle" fontSize="12" fontWeight="bold">Junction B</text>
+                    <text x="10" y="40" fontSize="10" fill="#64748b">t=0</text>
+                    <text x="10" y="80" fontSize="10" fill="#64748b">t=T</text>
+                    <text x="10" y="120" fontSize="10" fill="#64748b">t=2T</text>
+                    <line x1="50" y1="40" x2="250" y2="80" stroke="#3b82f6" strokeWidth="2" markerEnd="url(#arrow)" />
+                    <text x="150" y="55" fontSize="10" fill="#3b82f6">V</text>
+                    <line x1="250" y1="80" x2="50" y2="120" stroke="#ef4444" strokeWidth="2" strokeDasharray="4" markerEnd="url(#arrow)" />
+                    <text x="150" y="95" fontSize="10" fill="#ef4444">aV (Reflected)</text>
+                    <line x1="250" y1="80" x2="290" y2="88" stroke="#10b981" strokeWidth="2" markerEnd="url(#arrow)" />
+                    <text x="270" y="75" fontSize="10" fill="#10b981">bV</text>
+                </svg>
+            </div>
+        );
+
+        // --- 11(b) Specific Diagrams ---
+
+        const ShieldingDiagram = () => (
+            <div className="flex justify-center p-2 mb-2">
+                <svg width="150" height="100" viewBox="0 0 150 100" className="bg-slate-50 rounded">
+                    {/* Tower Top */}
+                    <path d="M 75 10 L 45 90 L 105 90 Z" fill="none" stroke="#64748b" strokeWidth="2"/>
+                    {/* Shield Wire */}
+                    <circle cx="75" cy="10" r="3" fill="#000"/>
+                    <text x="85" y="15" fontSize="8" fill="#000">Shield Wire</text>
+                    {/* Protected Zone */}
+                    <path d="M 75 10 L 25 90" stroke="#fbbf24" strokeWidth="1" strokeDasharray="2"/>
+                    <path d="M 75 10 L 125 90" stroke="#fbbf24" strokeWidth="1" strokeDasharray="2"/>
+                    <text x="75" y="50" textAnchor="middle" fontSize="8" fill="#b45309">Protected Zone (30°)</text>
+                </svg>
+            </div>
+        );
+
+        const GroundRodDiagram = () => (
+            <div className="flex justify-center p-2 mb-2">
+                <img 
+                    src="https://i.postimg.cc/vmLMQthJ/14092-30-2.jpg" 
+                    alt="Ground Rod and Counterpoise" 
+                    className="max-w-full h-40 object-contain bg-white rounded shadow-sm border border-slate-200"
+                />
+            </div>
+        );
+
+        const ExpulsionArresterDiagram = () => (
+            <div className="flex justify-center p-2 mb-2">
+                <img 
+                    src="https://i.postimg.cc/Hxzpt97k/expulsion-type-lightning-arrester-min.png" 
+                    alt="Expulsion Gap Arrester" 
+                    className="max-w-full h-40 object-contain bg-white rounded shadow-sm border border-slate-200"
+                />
+            </div>
+        );
+
+        const ValveArresterTowerDiagram = () => (
+            <div className="flex justify-center p-2 mb-2">
+                <svg width="200" height="150" viewBox="0 0 200 150" className="bg-slate-50 rounded">
+                    {/* Tower Body */}
+                    <rect x="20" y="20" width="10" height="130" fill="#94a3b8" />
+                    <rect x="15" y="145" width="20" height="5" fill="#475569" /> {/* Base */}
+                    
+                    {/* Cross Arm */}
+                    <rect x="30" y="40" width="100" height="5" fill="#94a3b8" />
+                    
+                    {/* Insulator String */}
+                    <line x1="120" y1="45" x2="120" y2="80" stroke="#cbd5e1" strokeWidth="3" strokeDasharray="4"/>
+                    <circle cx="120" cy="85" r="3" fill="#ef4444"/> {/* Conductor */}
+                    <text x="130" y="85" fontSize="8" fill="#ef4444">Line</text>
+                    
+                    {/* Arrester */}
+                    <rect x="80" y="45" width="10" height="40" fill="#3b82f6" rx="2" />
+                    <line x1="85" y1="45" x2="85" y2="40" stroke="#000" /> {/* To Ground/Arm */}
+                    <line x1="85" y1="85" x2="120" y2="85" stroke="#000" strokeWidth="1" /> {/* To Line */}
+                    
+                    <text x="65" y="65" fontSize="8" fill="#3b82f6" transform="rotate(-90 65,65)">Arrester</text>
+                    <text x="25" y="130" fontSize="8" fill="#475569" transform="rotate(-90 25,130)">Tower (Ground)</text>
+                </svg>
+            </div>
+        );
+
+        // --- 14(a) Diagrams ---
+
+        const LiquidBreakdownDiagrams = () => (
+            <div className="flex flex-col md:flex-row gap-4 my-4">
+                {/* Suspended Particle */}
+                <div className="flex-1 bg-white p-3 border border-slate-200 rounded-lg flex flex-col items-center">
+                    <div className="text-xs font-bold text-blue-800 mb-2">1. Suspended Particle Theory</div>
+                    <svg width="200" height="100" viewBox="0 0 200 100">
+                        <rect x="10" y="10" width="10" height="80" fill="#94a3b8" />
+                        <rect x="180" y="10" width="10" height="80" fill="#94a3b8" />
+                        <text x="15" y="98" fontSize="8" fill="#64748b">(-)</text>
+                        <text x="185" y="98" fontSize="8" fill="#64748b">(+)</text>
+                        
+                        {/* Chain of particles */}
+                        <circle cx="40" cy="50" r="4" fill="#fbbf24" stroke="#b45309" strokeWidth="1"/>
+                        <circle cx="70" cy="45" r="4" fill="#fbbf24" stroke="#b45309" strokeWidth="1"/>
+                        <circle cx="100" cy="55" r="4" fill="#fbbf24" stroke="#b45309" strokeWidth="1"/>
+                        <circle cx="130" cy="50" r="4" fill="#fbbf24" stroke="#b45309" strokeWidth="1"/>
+                        <circle cx="160" cy="52" r="4" fill="#fbbf24" stroke="#b45309" strokeWidth="1"/>
+                        
+                        <path d="M 40 50 L 160 52" stroke="#b45309" strokeWidth="1" strokeDasharray="2" opacity="0.5"/>
+                        <text x="100" y="20" textAnchor="middle" fontSize="10" fill="#b45309">Bridge Formation</text>
+                    </svg>
+                </div>
+
+                {/* Bubble Theory */}
+                <div className="flex-1 bg-white p-3 border border-slate-200 rounded-lg flex flex-col items-center">
+                    <div className="text-xs font-bold text-blue-800 mb-2">2. Bubble Theory</div>
+                    <svg width="200" height="100" viewBox="0 0 200 100">
+                        <rect x="10" y="10" width="10" height="80" fill="#94a3b8" />
+                        <rect x="180" y="10" width="10" height="80" fill="#94a3b8" />
+                        
+                        {/* Elongated Bubble */}
+                        <ellipse cx="100" cy="50" rx="40" ry="15" fill="#e0f2fe" stroke="#3b82f6" strokeWidth="1" />
+                        <text x="100" y="53" textAnchor="middle" fontSize="10" fill="#3b82f6">Gas Bubble</text>
+                        
+                        {/* Field Lines inside */}
+                        <line x1="70" y1="50" x2="130" y2="50" stroke="#ef4444" strokeWidth="1" />
+                        <text x="100" y="80" textAnchor="middle" fontSize="9" fill="#64748b">Elongation in E-Field</text>
+                    </svg>
+                </div>
+            </div>
+        );
+
+        const SolidBreakdownDiagram = () => (
+            <div className="flex flex-col items-center p-4 bg-slate-900 rounded-lg my-4 text-white">
+                <div className="flex gap-8 w-full justify-center">
+                {/* Treeing */}
+                <div className="flex flex-col items-center">
+                    <div className="text-xs font-bold text-slate-300 mb-1">Treeing</div>
+                    <svg width="100" height="100" viewBox="0 0 100 100" className="bg-slate-800 rounded border border-slate-700">
+                    <rect x="0" y="0" width="100" height="10" fill="#94a3b8" /> {/* Electrode */}
+                    <rect x="0" y="90" width="100" height="10" fill="#94a3b8" /> {/* Electrode */}
+                    {/* Tree paths */}
+                    <path d="M 50 10 L 50 30 L 30 50 L 20 70" stroke="#fbbf24" strokeWidth="1" fill="none" />
+                    <path d="M 50 30 L 70 45 L 60 65 L 75 80" stroke="#fbbf24" strokeWidth="1" fill="none" />
+                    <path d="M 30 50 L 40 60" stroke="#fbbf24" strokeWidth="1" fill="none" />
+                    </svg>
+                </div>
+
+                {/* Thermal */}
+                <div className="flex flex-col items-center">
+                    <div className="text-xs font-bold text-slate-300 mb-1">Thermal</div>
+                    <svg width="100" height="100" viewBox="0 0 100 100" className="bg-slate-800 rounded border border-slate-700">
+                    <rect x="0" y="0" width="100" height="10" fill="#94a3b8" />
+                    <rect x="0" y="90" width="100" height="10" fill="#94a3b8" />
+                    <defs>
+                        <radialGradient id="thermalGrad">
+                        <stop offset="0%" stopColor="#ef4444" />
+                        <stop offset="100%" stopColor="#1e293b" stopOpacity="0" />
+                        </radialGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="30" fill="url(#thermalGrad)" />
+                    <text x="50" y="55" textAnchor="middle" fontSize="10" fill="white">Heat</text>
+                    </svg>
+                </div>
+                </div>
+            </div>
+        );
+
+        const SimpsonWilsonDiagram = () => (
+            <div className="flex flex-col items-center p-4 bg-purple-50 rounded-lg my-4 border border-purple-100">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                {/* Simpson */}
+                <div className="flex flex-col items-center">
+                    <div className="text-xs font-bold text-purple-800 mb-2">Simpson (Breaking Drop)</div>
+                    <img 
+                        src="https://i.postimg.cc/rsqDVp5Q/Simpsons-theory-of-cloud-model.png" 
+                        alt="Simpson's Theory" 
+                        className="w-full h-48 object-contain bg-white rounded shadow-sm border border-slate-200"
+                    />
+                </div>
+
+                {/* Wilson */}
+                <div className="flex flex-col items-center">
+                    <div className="text-xs font-bold text-purple-800 mb-2">Wilson (Ion Capture)</div>
+                    <img 
+                        src="https://i.postimg.cc/8C3dzLCL/Screenshot-2025-12-29-175506.png" 
+                        alt="Wilson's Theory" 
+                        className="w-full h-48 object-contain bg-white rounded shadow-sm border border-slate-200"
+                    />
+                </div>
+                </div>
+            </div>
+        );
+
+        // --- Content Data ---
+
+        const partAQuestions = [
+            {
+                id: "a1", number: 1, part: "A",
+                question: "Define corona inception voltage.",
+                answer: "The critical disruptive voltage at which the corona discharge just begins to form on the surface of a conductor. It is the minimum voltage required to break down the air insulation immediately surrounding the conductor."
+            },
+            {
+                id: "a2", number: 2, part: "A",
+                question: "List the origin of switching surges?",
+                answer: (
+                <ul className="list-disc pl-5 space-y-1">
+                    <li>De-energizing of transmission lines, cables, and shunt capacitor banks.</li>
+                    <li>Disconnection of unloaded transformers.</li>
+                    <li>Sudden switching of loads.</li>
+                    <li>Short circuits and fault clearances.</li>
+                </ul>
+                )
+            },
+            {
+                id: "a3", number: 3, part: "A",
+                question: "Enumerate various schemes of protection against over voltages",
+                answer: (
+                <ul className="list-disc pl-5 space-y-1">
+                    <li>Shielding using overhead ground wires.</li>
+                    <li>Lightning Arresters (Surge Diverters).</li>
+                    <li>Ground rods and counterpoises.</li>
+                    <li>Surge absorbers (capacitors/reactors).</li>
+                </ul>
+                )
+            },
+            {
+                id: "a4", number: 4, part: "A",
+                question: "State the specifications of a travelling wave?",
+                answer: "A travelling wave is typically specified by its Crest (Peak) Value, Front Time (Rise time), and Tail Time (time to decay to 50% of peak). Example: 1.2/50 μs for a standard lightning impulse."
+            },
+            {
+                id: "a5", number: 5, part: "A",
+                question: "Define Isokeraunic level",
+                answer: "It is the average number of days in a year on which thunder is heard at a particular location. It is a measure of the lightning activity in a region."
+            },
+            {
+                id: "a6", number: 6, part: "A",
+                question: "What are electronegative gases?",
+                answer: (
+                <span>Gases that have high electron affinity and tend to attach free electrons to form heavy negative ions, effectively removing electrons from the ionization process. Examples: SF<sub>6</sub> (Sulfur Hexafluoride), Freon.</span>
+                )
+            },
+            {
+                id: "a7", number: 7, part: "A",
+                question: "Write the Paschen's law",
+                answer: (
+                <span>
+                    Paschen's law states that the breakdown voltage <span className="font-serif italic">V</span> of a uniform field gap is a unique function of the product of gas pressure <span className="font-serif italic">p</span> and gap distance <span className="font-serif italic">d</span>.
+                    <br />
+                    <code className="bg-slate-100 px-1 rounded text-sm mt-1 block w-fit">V = f(p × d)</code>
+                </span>
+                )
+            },
+            {
+                id: "a8", number: 8, part: "A",
+                question: "Commercial liquid dielectrics are different from pure liquid Dielectrics? Justify",
+                answer: "Yes. Pure liquids are chemically pure and breakdown is due to electron emission. Commercial liquids (like transformer oil) contain impurities (moisture, gas bubbles, suspended particles) which significantly lower the breakdown strength and alter the breakdown mechanism."
+            },
+            {
+                id: "a9", number: 9, part: "A",
+                question: "Discuss about composite dielectric?",
+                answer: "A composite dielectric is an insulation system made of multiple layers of different dielectric materials (e.g., solid + liquid, or oil + paper). Breakdown usually initiates in the material with the lower dielectric constant due to higher electric field stress in that layer."
+            },
+            {
+                id: "a10", number: 10, part: "A",
+                question: "Define Townsends first ionization coefficient?",
+                answer: (
+                <span>
+                    Defined as the average number of ionizing collisions made by one electron per unit distance traveled in the direction of the electric field. Denoted by <span className="font-serif italic">α</span>.
+                </span>
+                )
+            },
+        ];
+
+        const partBQuestions = [
+        {
+            id: "b11", number: 11, part: "B",
+            question: "Charge Formation & Protection",
+            answer: null,
+            subQuestions: [
+            {
+                label: "(a) Explain the theories of charge formation in the cloud proposed by Reynolds & Mason.",
+                question: "Theory of Charge Formation",
+                answer: (
+                <div className="space-y-4">
+                    <p>
+                    Reynolds and Mason proposed a theory based on the <strong>thermoelectric effect</strong> involving ice crystals and graupel (soft hail) within thunderclouds.
+                    </p>
+                    <CloudChargeDiagram />
+                    <h4 className="font-bold text-slate-800">Key Mechanisms:</h4>
+                    <ul className="list-disc pl-5 space-y-2 text-slate-700">
+                    <li>
+                        <strong>Particle Interaction:</strong> Thunderclouds contain supercooled water droplets, ice crystals, and heavier graupel pellets. The graupel falls through the cloud, colliding with lighter, rising ice crystals.
+                    </li>
+                    <li>
+                        <strong>Temperature Difference:</strong> The impact causes a temporary water bridge. The crucial factor is the temperature difference between the touching particles. Heat flows from the warmer to the colder particle.
+                    </li>
+                    <li>
+                        <strong>Charge Separation (Thermoelectric Effect):</strong> H<sup>+</sup> ions (protons) are more mobile in ice than OH<sup>-</sup> ions. They migrate down the temperature gradient (from warm to cold).
+                        <ul className="list-circle pl-5 mt-1 text-sm text-slate-600">
+                        <li>If the falling Graupel is <em>warmer</em> (due to latent heat of freezing water), it loses (+) ions and becomes <strong>Negative</strong>.</li>
+                        <li>The rising Ice Crystals become <strong>Positive</strong>.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Result:</strong> Gravitational separation occurs. Heavy negative graupel accumulates at the <strong>bottom</strong> of the cloud, while light positive crystals are carried to the <strong>top</strong> by updrafts.
+                    </li>
+                    <li>
+                        <strong>-15°C Reversal:</strong> Reynolds found that below -15°C, the polarity can reverse, but the general structure remains: Top (+) and Bottom (-).
+                    </li>
+                    </ul>
+                </div>
+                )
+            },
+            {
+                label: "(b) Explain in detail the protection of power system equipment's using various protective devices.",
+                question: "Power System Protection Devices",
+                answer: (
+                <div className="space-y-4">
+                    <p>Power systems must be protected against lightning surges and switching overvoltages. The protection hierarchy includes:</p>
+                    
+                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="bg-slate-50 p-4 rounded-lg">
+                        <ShieldingDiagram />
+                        <h4 className="font-bold text-blue-700 mb-2">1. Overhead Earth Wires (Shielding)</h4>
+                        <p className="text-sm text-slate-700">
+                        Located above phase conductors. They intercept direct lightning strokes and divert current to the earth.
+                        <br/><strong>Protection Angle:</strong> Ideally 30° or less.
+                        </p>
+                    </div>
+                    
+                    <div className="bg-slate-50 p-4 rounded-lg">
+                        <GroundRodDiagram />
+                        <h4 className="font-bold text-blue-700 mb-2">2. Ground Rods & Counterpoise</h4>
+                        <p className="text-sm text-slate-700">
+                        Used to lower tower footing resistance. Counterpoise wires are buried horizontally when deep rods are ineffective (rocky soil).
+                        </p>
+                    </div>
+
+                    <div className="bg-slate-50 p-4 rounded-lg">
+                        <div className="bg-yellow-50 p-2 text-xs mb-2 border border-yellow-100 rounded">
+                            <strong>Surge Arresters (Gapped & Gapless):</strong> General category including Rod Gaps, Expulsion, and Valve types.
+                        </div>
+                        <ExpulsionArresterDiagram />
+                        <h4 className="font-bold text-blue-700 mb-2">3. Expulsion Gap Arrester</h4>
+                        <p className="text-sm text-slate-700">
+                        Also called Protector Tube. Has an external series gap and an internal gap inside a fiber tube. The arc vaporizes the fiber, generating high-pressure gas that expels the arc through a bottom vent.
+                        </p>
+                    </div>
+
+                    <div className="bg-slate-50 p-4 rounded-lg">
+                        <ValveArresterTowerDiagram />
+                        <h4 className="font-bold text-blue-800 mb-2">4. Valve Type / Protector Tube</h4>
+                        <p className="text-sm text-slate-700">
+                        <strong>Non-linear Resistors:</strong> Metal Oxide Varistors (MOV) or SiC.
+                        <br/><strong>Operation:</strong> At normal voltage, resistance is infinite (insulator). At surge voltage, resistance drops to near zero, conducting the surge to ground.
+                        <br/><strong>Advantage:</strong> No follow current. Instantly recovers after surge.
+                        </p>
+                    </div>
+                    </div>
+                </div>
+                )
+            }
+            ]
+        },
+        {
+            id: "b12", number: 12, part: "B",
+            question: "Overvoltages & Lattice Diagram",
+            answer: null,
+            subQuestions: [
+            {
+                label: "(a) Explain various causes of over voltage in power systems.",
+                question: "Causes of Overvoltage",
+                answer: (
+                <div className="space-y-4">
+                    <p>Overvoltages are broadly classified into two categories:</p>
+                    <div className="space-y-3">
+                    <div className="border-l-4 border-amber-500 pl-4">
+                        <h4 className="font-bold text-slate-800">1. External Causes (Lightning)</h4>
+                        <p className="text-sm text-slate-600">Atmospheric disturbances not directly connected to the system operating voltage.</p>
+                        <ul className="list-disc pl-5 text-sm mt-1">
+                        <li><strong>Direct Stroke:</strong> Lightning hits the phase conductor directly. Causes massive voltage rise (<span>V = I × Z/2</span>).</li>
+                        <li><strong>Indirect Stroke:</strong> Lightning hits nearby ground/tower. Induces voltage on the line due to electromagnetic coupling.</li>
+                        </ul>
+                    </div>
+
+                    <div className="border-l-4 border-indigo-500 pl-4">
+                        <h4 className="font-bold text-slate-800">2. Internal Causes (Switching)</h4>
+                        <p className="text-sm text-slate-600">Generated within the system due to changes in operating state.</p>
+                        <ul className="list-disc pl-5 text-sm mt-1">
+                        <li><strong>Switching Surges:</strong> Opening/closing breakers. Especially dangerous on EHV lines (above 220kV).</li>
+                        <li><strong>Insulation Failure:</strong> Ground faults cause voltage rise on healthy phases.</li>
+                        <li><strong>Arcing Ground:</strong> Intermittent arc in isolated neutral systems creates cumulative oscillations.</li>
+                        <li><strong>Resonance:</strong> Series resonance between line capacitance and transformer inductance (Ferranti Effect).</li>
+                        </ul>
+                    </div>
+                    </div>
+                </div>
+                )
+            },
+            {
+                label: "(b) Briefly explain about the Bewley Lattice Diagram.",
+                question: "Bewley Lattice Diagram",
+                answer: (
+                <div className="space-y-4">
+                    <BewleyLattice />
+                    <p className="text-slate-700">
+                        The Bewley Lattice Diagram is a graphical method used to determine the voltage at any point in a transmission line network over time, accounting for multiple reflections at junctions.
+                    </p>
+                    <h4 className="font-bold text-slate-800 mt-2">Construction Steps:</h4>
+                    <ol className="list-decimal pl-5 space-y-1 text-sm text-slate-700">
+                        <li>Draw two vertical axes representing the junctions (impedance discontinuities).</li>
+                        <li>The horizontal scale represents time. The vertical distance between steps represents the travel time (T) of the wave between junctions.</li>
+                        <li><strong>Coefficients:</strong> Calculate Reflection coeff (α) and Transmission coeff (β) for each junction.
+                        <br/><code className="bg-slate-100 text-xs px-2 py-1">α = (Z<sub>2</sub> - Z<sub>1</sub>) / (Z<sub>2</sub> + Z<sub>1</sub>)</code>
+                        </li>
+                        <li>Draw diagonal lines to show the wave traveling. At each junction, the wave splits into a reflected wave (αV) and transmitted wave (βV).</li>
+                        <li>To find the potential at any time t, sum the vertical components of all waves that have arrived at that point up to time t.</li>
+                    </ol>
+                </div>
+                )
+            }
+            ]
+        },
+        {
+            id: "b13", number: 13, part: "B",
+            question: "Lightning Modeling & Ionization",
+            answer: null,
+            subQuestions: [
+            {
+                label: "(a) Explain about modeling of lightning and rate of charging of thunder cloud.",
+                question: "Lightning Modeling & Cloud Charging",
+                answer: (
+                <div className="space-y-4">
+                    <h4 className="font-bold text-slate-800">1. Rate of Charging Derivation</h4>
+                    <p className="text-sm text-slate-700">
+                        Thunderclouds are charged by upward air currents.
+                        <br/> Let <strong>I</strong> be the charging current and <strong>i<sub>l</sub></strong> be the leakage current through the air.
+                        <br/> The leakage is proportional to the voltage <strong>V</strong> built up and air conductivity.
+                    </p>
+                    <div className="bg-slate-50 border border-slate-200 p-3 rounded text-sm font-mono space-y-2">
+                        <p>Net Charge Rate: dQ/dt = I - i<sub>l</sub></p>
+                        <p>Since V = Q/C, leakage current i<sub>l</sub> ∝ V ∝ Q.</p>
+                        <p>So, dQ/dt = I - αQ</p>
+                        <p className="text-slate-500 italic">// Solving this differential equation:</p>
+                        <p>Q(t) = (I/α) * (1 - e<sup>-αt</sup>)</p>
+                        <p><strong>Q(t) = Q<sub>max</sub> (1 - e<sup>-t/τ</sup>)</strong></p>
+                    </div>
+                    <p className="text-sm text-slate-700 mt-2">
+                        This shows exponential charge growth. A flash occurs when the potential gradient exceeds 30 kV/cm.
+                    </p>
+
+                    <h4 className="font-bold text-slate-800 mt-4">2. Modeling of Lightning Stroke</h4>
+                    <p className="text-sm text-slate-700">
+                        For engineering analysis, lightning is modeled as a current source.
+                    </p>
+                    <div className="bg-slate-100 p-3 rounded text-sm font-mono">
+                        Double Exponential Waveform:<br/>
+                        <span>I(t) = I<sub>0</sub> (e<sup>-αt</sup> - e<sup>-βt</sup>)</span>
+                    </div>
+                    <p className="text-sm text-slate-700 mt-2">
+                        Where α controls the tail time and β controls the front time. This produces the standard impulse shape (e.g., 1.2/50 μs).
+                    </p>
+                </div>
+                )
+            },
+            {
+                label: "(b) Explain the Townsend's first and second ionization processes.",
+                question: "Townsend's Ionization Processes",
+                answer: (
+                <div className="space-y-4">
+                    <TownsendDiagram />
+                    
+                    {/* Derivation Container */}
+                    <div className="space-y-6">
+                    
+                    {/* First Ionization */}
+                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <h5 className="font-bold text-indigo-800 mb-2">1. Primary Ionization (Townsend's First Coefficient α)</h5>
+                        <p className="text-sm text-slate-700 mb-2">
+                        Defined as the number of ionizing collisions made by one electron per unit length in the direction of the field.
+                        </p>
+                        <div className="font-mono text-xs md:text-sm bg-white p-3 rounded border border-slate-300 space-y-2">
+                        <p>Let n₀ = electrons emitted from cathode (x=0).</p>
+                        <p>At distance x, let number of electrons be n.</p>
+                        <p>In distance dx, new electrons generated dn:</p>
+                        <p className="font-bold pl-4">dn = α · n · dx</p>
+                        <p>Rearranging:</p>
+                        <p className="pl-4">dn / n = α · dx</p>
+                        <p>Integrating from x=0 to x=d:</p>
+                        <p className="pl-4">∫(dn/n) = ∫ α · dx</p>
+                        <p className="pl-4">ln(n) - ln(n₀) = α · d</p>
+                        <p className="pl-4">ln(n/n₀) = αd</p>
+                        <p className="font-bold text-blue-700 mt-2">n = n₀ e<sup>αd</sup> &nbsp; or &nbsp; I = I₀ e<sup>αd</sup></p>
+                        </div>
+                    </div>
+
+                    {/* Second Ionization */}
+                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <h5 className="font-bold text-indigo-800 mb-2">2. Secondary Ionization (Townsend's Second Coefficient γ)</h5>
+                        <p className="text-sm text-slate-700 mb-2">
+                        Accounts for secondary electrons released from the cathode by positive ion bombardment.
+                        </p>
+                        <div className="font-mono text-xs md:text-sm bg-white p-3 rounded border border-slate-300 space-y-2">
+                        <p>Let:</p>
+                        <ul className="list-disc pl-6 mb-2 space-y-1">
+                            <li>n₀ = primary electrons (external source).</li>
+                            <li>n₊ = secondary electrons produced by ions.</li>
+                            <li>n_total = (n₀ + n₊) electrons leaving cathode.</li>
+                        </ul>
+                        
+                        <p>Electrons reaching anode (n_a):</p>
+                        <p className="pl-4">n_a = n_total · e<sup>αd</sup></p>
+                        
+                        <p>Number of positive ions formed in gap:</p>
+                        <p className="pl-4">n_ions = n_a - n_total</p>
+                        <p className="pl-4">n_ions = n_total (e<sup>αd</sup> - 1)</p>
+                        
+                        <p>Secondary electrons (n₊) released by ions (where γ is yield):</p>
+                        <p className="pl-4">n₊ = γ · n_ions</p>
+                        <p className="pl-4">n₊ = γ · n_total (e<sup>αd</sup> - 1)</p>
+                        
+                        <p>Substitute back into total cathode emission:</p>
+                        <p className="pl-4">n_total = n₀ + n₊</p>
+                        <p className="pl-4">n_total = n₀ + γ · n_total (e<sup>αd</sup> - 1)</p>
+                        <p className="pl-4">n_total [1 - γ(e<sup>αd</sup> - 1)] = n₀</p>
+                        
+                        <p className="font-bold text-blue-700 mt-2">I = I₀ e<sup>αd</sup> / [1 - γ(e<sup>αd</sup> - 1)]</p>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-2 italic">
+                        *Breakdown Criterion (Sparking): Denominator → 0, i.e., γ(e<sup>αd</sup> - 1) = 1
+                        </p>
+                    </div>
+                    
+                    </div>
+                </div>
+                )
+            }
+            ]
+        },
+        {
+            id: "b14", number: 14, part: "B",
+            question: "Commercial Liquid Dielectrics",
+            answer: null,
+            subQuestions: [
+            {
+                label: "(a) Explain the various theories that explain breakdown in Commercial liquid dielectrics.",
+                question: "Breakdown in Commercial Liquids",
+                answer: (
+                <div className="space-y-3">
+                    <p className="text-sm">Commercial liquids are not pure; they contain impurities like solid particles, gas bubbles, and moisture. Three main theories explain their breakdown:</p>
+                    
+                    <LiquidBreakdownDiagrams />
+
+                    <div className="space-y-2">
+                    <details className="group bg-white border border-slate-200 rounded-lg open:ring-1 open:ring-blue-200">
+                        <summary className="flex items-center p-3 font-medium cursor-pointer list-none">
+                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-2">1</span>
+                        Suspended Particle Theory
+                        </summary>
+                        <div className="p-3 pt-0 text-sm text-slate-600">
+                            Impurities (fibers, dust) usually have a permittivity (ε<sub>2</sub>) different from the oil (ε<sub>1</sub>). If ε<sub>2</sub> {'>'} ε<sub>1</sub>, the particles experience a force moving them to the region of highest stress. They align to form a conducting bridge, shorting the gap.
+                            <br/><code className="text-xs mt-1 block">Force F ∝ r<sup>3</sup> ∇E<sup>2</sup></code>
+                        </div>
+                    </details>
+
+                    <details className="group bg-white border border-slate-200 rounded-lg open:ring-1 open:ring-blue-200">
+                        <summary className="flex items-center p-3 font-medium cursor-pointer list-none">
+                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-2">2</span>
+                        Cavitation & Bubble Theory
+                        </summary>
+                        <div className="p-3 pt-0 text-sm text-slate-600">
+                            Gas bubbles can form due to temperature or trapped air. Gas has lower breakdown strength than oil. A discharge initiates inside the bubble, elongating it in the field direction, leading to complete breakdown.
+                        </div>
+                    </details>
+
+                    <details className="group bg-white border border-slate-200 rounded-lg open:ring-1 open:ring-blue-200">
+                        <summary className="flex items-center p-3 font-medium cursor-pointer list-none">
+                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-2">3</span>
+                        Stressed Oil Volume Theory
+                        </summary>
+                        <div className="p-3 pt-0 text-sm text-slate-600">
+                            Breakdown strength is determined by the "weakest link" in the largest stressed volume. The breakdown voltage depends on the volume of oil under high stress; larger volumes are more likely to contain a breakdown-triggering impurity.
+                        </div>
+                    </details>
+                    </div>
+                </div>
+                )
+            },
+            {
+                label: "(b) Give short notes on the application of dielectric materials for various Power system components.",
+                question: "Dielectric Applications",
+                answer: (
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="p-3 bg-slate-50 rounded border-l-4 border-green-500">
+                        <h5 className="font-bold text-slate-800">Power Transformers</h5>
+                        <p className="text-sm text-slate-600 mt-1">
+                        <strong>Materials:</strong> Transformer Oil, Paper, Pressboard.
+                        <br/><strong>Function:</strong> Oil provides insulation and cooling. Paper insulates windings.
+                        </p>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded border-l-4 border-blue-500">
+                        <h5 className="font-bold text-slate-800">Cables</h5>
+                        <p className="text-sm text-slate-600 mt-1">
+                        <strong>Materials:</strong> XLPE (Cross-linked Polyethylene), Impregnated Paper, PVC.
+                        <br/><strong>Function:</strong> Must withstand high stress and moisture. XLPE is standard for HV.
+                        </p>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded border-l-4 border-purple-500">
+                        <h5 className="font-bold text-slate-800">Capacitors</h5>
+                        <p className="text-sm text-slate-600 mt-1">
+                        <strong>Materials:</strong> Polypropylene film, synthetic oils.
+                        <br/><strong>Function:</strong> High dielectric constant and low loss tangent are crucial for efficiency.
+                        </p>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded border-l-4 border-red-500">
+                        <h5 className="font-bold text-slate-800">Bushings</h5>
+                        <p className="text-sm text-slate-600 mt-1">
+                        <strong>Materials:</strong> Porcelain, Oil-Impregnated Paper (OIP).
+                        <br/><strong>Function:</strong> Insulates conductors passing through grounded tank walls.
+                        </p>
+                    </div>
+                </div>
+                )
+            }
+            ]
+        },
+        {
+            id: "b15", number: 15, part: "B",
+            question: "Solid Dielectrics & Maintenance",
+            answer: null,
+            subQuestions: [
+            {
+                label: "(a) Explain about the breakdown mechanisms in solid dielectrics with neat sketches",
+                question: "Breakdown in Solids",
+                answer: (
+                <div className="space-y-4">
+                    <p className="text-sm text-slate-700">Solid breakdown is permanent. Mechanisms depend on the time of voltage application:</p>
+                    <SolidBreakdownDiagram />
+                    <div className="relative border-l-2 border-slate-300 ml-4 pl-6 py-2 space-y-6">
+                        
+                        <div>
+                        <h5 className="font-bold text-indigo-700 text-sm">1. Intrinsic Breakdown (Times {'<'} 10<sup>-8</sup> s)</h5>
+                        <p className="text-xs text-slate-600">Electronic breakdown. Electrons gain energy from the field faster than they lose it to the lattice, causing runaway ionization. The theoretical maximum limit.</p>
+                        </div>
+
+                        <div>
+                        <h5 className="font-bold text-indigo-700 text-sm">2. Electromechanical Breakdown</h5>
+                        <p className="text-xs text-slate-600">
+                            Electrostatic compression forces attract electrodes. If the material is soft, it compresses, thickness (d) decreases, field (E=V/d) increases, leading to collapse.
+                            <br/>Criterion: E<sub>max</sub> ≈ 0.6 (Y/ε)<sup>0.5</sup>
+                        </p>
+                        </div>
+
+                        <div>
+                        <h5 className="font-bold text-indigo-700 text-sm">3. Thermal Breakdown</h5>
+                        <p className="text-xs text-slate-600">
+                            Dielectric loss generates heat (W = E<sup>2</sup> ω C tan δ). If heat generation {'>'} heat dissipation, temperature rises, material melts or burns. Common in long-term operation.
+                        </p>
+                        </div>
+
+                        <div>
+                        <h5 className="font-bold text-indigo-700 text-sm">4. Treeing and Tracking</h5>
+                        <p className="text-xs text-slate-600">
+                            Erosion of material surface due to sparks (Tracking) or internal channels branching out like a tree (Treeing) due to partial discharges in voids.
+                        </p>
+                        </div>
+
+                    </div>
+                </div>
+                )
+            },
+            {
+                label: "(b) Explain the various processes followed for the maintenance & purification of transformer oil",
+                question: "Transformer Oil Maintenance",
+                answer: (
+                <div className="space-y-4">
+                    <p className="text-sm text-slate-700">Transformer oil deteriorates due to oxidation and moisture contamination. Regular maintenance is required to maintain High Breakdown Strength and Low Tan Delta.</p>
+                    
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-start gap-3 bg-white p-3 rounded shadow-sm border border-slate-100">
+                        <div className="bg-teal-100 p-2 rounded text-teal-800 mt-1"><Droplets size={20}/></div>
+                        <div>
+                            <h5 className="font-bold text-sm text-teal-800">1. Filtration (Streamline Filter)</h5>
+                            <p className="text-xs text-slate-600 mt-1">
+                            <strong>Process:</strong> Oil is pumped through a series of filter packs made of special paper.
+                            <br/><strong>Removes:</strong> Solid impurities like sludge, dust, and fibers. Also absorbs small amounts of dissolved water.
+                            </p>
+                        </div>
+                        </div>
+
+                        <div className="flex items-start gap-3 bg-white p-3 rounded shadow-sm border border-slate-100">
+                        <div className="bg-teal-100 p-2 rounded text-teal-800 mt-1"><Activity size={20}/></div>
+                        <div>
+                            <h5 className="font-bold text-sm text-teal-800">2. Centrifugal Separation</h5>
+                            <p className="text-xs text-slate-600 mt-1">
+                            <strong>Process:</strong> Oil is spun at high speed. Due to density difference, heavier water and sludge are thrown to the outer periphery and drained.
+                            <br/><strong>Removes:</strong> Free water and heavier solid contaminants. Ineffective for dissolved gases.
+                            </p>
+                        </div>
+                        </div>
+
+                        <div className="flex items-start gap-3 bg-white p-3 rounded shadow-sm border border-slate-100">
+                        <div className="bg-teal-100 p-2 rounded text-teal-800 mt-1"><Zap size={20}/></div>
+                        <div>
+                            <h5 className="font-bold text-sm text-teal-800">3. Vacuum Degassing (Most Effective)</h5>
+                            <p className="text-xs text-slate-600 mt-1">
+                            <strong>Process:</strong> Oil is heated (approx 60°C) and sprayed into a vacuum chamber.
+                            <br/><strong>Principle:</strong> Lower pressure reduces the boiling point. Dissolved moisture and gases boil off instantly.
+                            <br/><strong>Removes:</strong> Dissolved moisture (down to 10 ppm) and dissolved gases. Essential for EHV transformers.
+                            </p>
+                        </div>
+                        </div>
+                        
+                        <div className="bg-yellow-50 p-3 rounded text-xs text-slate-700 border-l-4 border-yellow-400">
+                        <strong>Testing Standards (IS:1866):</strong>
+                        <ul className="list-disc pl-4 mt-1">
+                            <li><strong>BDV Test:</strong> Minimum 30kV for new oil (2.5mm gap).</li>
+                            <li><strong>Acidity Test:</strong> Should be less than 0.5 mg KOH/g.</li>
+                            <li><strong>Tan Delta:</strong> Should be low (approx 0.002).</li>
+                        </ul>
+                        </div>
+                    </div>
+                </div>
+                )
+            }
+            ]
+        },
+        ];
+
+        const partCQuestions = [
+        {
+            id: "c16", number: 16, part: "C",
+            question: "Advanced Theory & Problems",
+            answer: null,
+            subQuestions: [
+            {
+                label: "(a) Show and explain the cloud charge formation theory proposed by Simpson's and Wilson.",
+                question: "Simpson & Wilson Theories",
+                answer: (
+                <div className="space-y-6">
+                    <SimpsonWilsonDiagram />
+                    <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                    <h4 className="font-bold text-lg text-purple-700 mb-2">1. Simpson's Theory (Breaking Drop)</h4>
+                    <p className="text-sm text-slate-700 mb-2">
+                        Based on the shattering of water drops by air currents.
+                    </p>
+                    <ul className="list-disc pl-5 text-sm space-y-1 text-slate-600">
+                        <li>Large water drops fall and are hit by upward air currents ({'>'} 800 cm/s).</li>
+                        <li>The drops become unstable and break into smaller droplets.</li>
+                        <li><strong>Simpson's finding:</strong> Breaking drops become <strong>Positively</strong> charged, while the air carries the fine spray which becomes <strong>Negatively</strong> charged.</li>
+                        <li>Result: Positive charge at the bottom (heavy drops), Negative charge at top (air/spray). *Note: This contradicts the actual observed polarity (Positive top), so this theory is partially flawed but historically important.*</li>
+                    </ul>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                    <h4 className="font-bold text-lg text-purple-700 mb-2">2. Wilson's Theory (Ion Capture)</h4>
+                    <p className="text-sm text-slate-700 mb-2">
+                        Based on selective ion capture by falling drops in an existing electric field.
+                    </p>
+                    <ul className="list-disc pl-5 text-sm space-y-1 text-slate-600">
+                        <li>Assume a pre-existing field (Positive top, Negative earth).</li>
+                        <li>A falling drop is polarized by induction: Bottom is (+), Top is (-).</li>
+                        <li>As it falls through ions in the air:
+                        <ul className="list-circle pl-5 mt-1">
+                            <li>It attracts (-) ions to its (+) bottom.</li>
+                            <li>It repels (+) ions from its (+) bottom.</li>
+                        </ul>
+                        </li>
+                        <li><strong>Result:</strong> Drops collect negative charge and bring it to the bottom of the cloud. This <em>reinforces</em> the typical cloud polarity (Negative bottom).</li>
+                    </ul>
+                    </div>
+                </div>
+                )
+            },
+            {
+                label: "(b) Numerical Problem: Townsend's Coefficient Calculation",
+                question: "Problem Solution",
+                answer: (
+                <div className="space-y-4">
+                    <div className="bg-slate-50 p-4 rounded border-l-4 border-red-500">
+                    <h5 className="font-bold text-red-800 flex items-center gap-2">
+                        <Info size={16}/> Note on Input Data
+                    </h5>
+                    <p className="text-xs text-slate-700 mt-1">
+                        The problem states current <strong>increases</strong> (10<sup>8</sup> → 10<sup>9</sup>) as distance <strong>decreases</strong> (0.4 → 0.1). This contradicts Townsend's theory where I = I<sub>0</sub>e<sup>αd</sup> (current grows with distance).
+                        <br/><br/>
+                        <strong>Assumed Correction:</strong> The exponents are likely negative, and the standard physics applies (larger distance = larger current).
+                        <br/>
+                        d<sub>1</sub> = 0.1 cm, I<sub>1</sub> = 5.5 × 10<sup>-9</sup> A
+                        <br/>
+                        d<sub>2</sub> = 0.4 cm, I<sub>2</sub> = 5.5 × 10<sup>-8</sup> A
+                    </p>
+                    </div>
+
+                    <div className="font-mono text-sm bg-slate-900 text-slate-300 p-4 rounded-lg overflow-x-auto">
+                    <p className="text-green-400">// Given:</p>
+                    <p>I1 = 5.5e-9 A;  d1 = 0.1 cm</p>
+                    <p>I2 = 5.5e-8 A;  d2 = 0.4 cm</p>
+                    <br/>
+                    <p className="text-green-400">// Formula: Townsend Primary Ionization</p>
+                    <p>I = I0 * e^(α*d)</p>
+                    <br/>
+                    <p className="text-green-400">// Take ratio to eliminate I0:</p>
+                    <p>I2 / I1 = e^(α*d2) / e^(α*d1)</p>
+                    <p>I2 / I1 = e^(α * (d2 - d1))</p>
+                    <br/>
+                    <p className="text-green-400">// Substitute values:</p>
+                    <p>(5.5e-8) / (5.5e-9) = e^(α * (0.4 - 0.1))</p>
+                    <p>10 = e^(0.3 * α)</p>
+                    <br/>
+                    <p className="text-green-400">// Take natural log (ln):</p>
+                    <p>ln(10) = 0.3 * α</p>
+                    <p>2.3026 = 0.3 * α</p>
+                    <br/>
+                    <p className="text-green-400">// Solve for α:</p>
+                    <p>α = 2.3026 / 0.3</p>
+                    <p className="text-yellow-400 font-bold">α = 7.675 / cm</p>
+                    </div>
+
+                    <div className="bg-white p-3 border border-slate-200 rounded">
+                        <h5 className="font-bold text-sm">Result:</h5>
+                        <p className="text-sm">The primary ionization coefficient <strong>α = 7.675 ionizing collisions per cm</strong>.</p>
+                    </div>
+                </div>
+                )
+            }
+            ]
+        }
+        ];
+
+        // --- Main App Component ---
+
+        function ExamSolution() {
+            const [activeTab, setActiveTab] = useState('A');
+            const [openItems, setOpenItems] = useState({});
+
+            const toggleItem = (id) => {
+                setOpenItems(prev => ({ ...prev, [id]: !prev[id] }));
+            };
+
+            const renderContent = () => {
+                if (activeTab === 'A') {
+                return (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+                    {partAQuestions.map((q) => (
+                        <Card key={q.id} className="hover:shadow-lg transition-shadow">
+                        <div className="p-4">
+                            <div className="flex justify-between items-start mb-2">
+                            <Badge color="blue">Q{q.number}</Badge>
+                            <span className="text-xs text-slate-400 font-mono">2 Marks</span>
+                            </div>
+                            <h3 className="font-semibold text-slate-800 mb-2 text-sm">{q.question}</h3>
+                            <div className="text-sm text-slate-600 border-t pt-2 mt-2">{q.answer}</div>
+                        </div>
+                        </Card>
+                    ))}
+                    </div>
+                );
+                }
+
+                const questions = activeTab === 'B' ? partBQuestions : partCQuestions;
+
+                return (
+                <div className="space-y-6">
+                    {questions.map((q) => (
+                    <Card key={q.id} className="border-l-4 border-l-indigo-500">
+                        <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-800">Question {q.number}</h2>
+                            <p className="text-xs text-slate-500 uppercase tracking-wide">{q.question}</p>
+                        </div>
+                        <Badge color="purple">{activeTab === 'C' ? '15 Marks' : '13 Marks'}</Badge>
+                        </div>
+                        
+                        <div className="p-4 space-y-4">
+                        {q.subQuestions?.map((sub, idx) => (
+                            <div key={idx} className="border border-slate-200 rounded-lg overflow-hidden">
+                            <button 
+                                onClick={() => toggleItem(`${q.id}-${idx}`)}
+                                className="w-full flex justify-between items-center p-3 bg-white hover:bg-slate-50 text-left transition-colors"
+                            >
+                                <span className="font-medium text-slate-800 text-sm md:text-base pr-4">{sub.label}</span>
+                                {openItems[`${q.id}-${idx}`] ? <ChevronUp size={20} className="text-indigo-500"/> : <ChevronDown size={20} className="text-slate-400"/>}
+                            </button>
+                            
+                            {openItems[`${q.id}-${idx}`] && (
+                                <div className="p-4 bg-white border-t border-slate-100 animate-in fade-in slide-in-from-top-2 duration-200">
+                                {sub.answer}
+                                </div>
+                            )}
+                            </div>
+                        ))}
+                        </div>
+                    </Card>
+                    ))}
+                </div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-slate-100 font-sans text-slate-900 pb-12">
+                {/* Header */}
+                <header className="bg-indigo-700 text-white shadow-lg">
+                    <div className="max-w-5xl mx-auto px-4 py-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                        <h1 className="text-2xl font-bold tracking-tight">SRM Valliammai Engineering College</h1>
+                        <p className="text-indigo-200 text-sm mt-1">Dept of EEE | Continuous Assessment Test - 1</p>
+                        </div>
+                        <div className="flex gap-2 text-xs font-mono bg-indigo-800 p-2 rounded-lg border border-indigo-600">
+                        <div className="px-3 border-r border-indigo-600">
+                            <span className="block text-indigo-300">Total</span>
+                            <span className="font-bold text-lg">100m</span>
+                        </div>
+                        <div className="px-3">
+                            <span className="block text-indigo-300">Duration</span>
+                            <span className="font-bold text-lg">3 Hrs</span>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                </header>
+
+                {/* Main Content */}
+                <main className="max-w-5xl mx-auto px-4 py-8">
+                    
+                    {/* Navigation Tabs */}
+                    <div className="flex space-x-2 mb-8 bg-white p-1 rounded-xl shadow-sm w-fit mx-auto md:mx-0">
+                    {['A', 'B', 'C'].map((part) => (
+                        <button
+                        key={part}
+                        onClick={() => setActiveTab(part)}
+                        className={`
+                            px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200
+                            ${activeTab === part 
+                            ? 'bg-indigo-600 text-white shadow-md transform scale-105' 
+                            : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}
+                        `}
+                        >
+                        Part {part}
+                        </button>
+                    ))}
+                    </div>
+
+                    {/* Dynamic Content Area */}
+                    <div className="animate-in fade-in duration-300">
+                        {renderContent()}
+                    </div>
+
+                </main>
+                
+                <footer className="text-center text-slate-400 text-xs py-8">
+                    <p>Generated by AI Assistant • Educational Purpose Only</p>
+                </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ExamSolution />);
+    </script>
+</body>
+</html>
